@@ -8,7 +8,7 @@ namespace Desafio_tecnico.Services.Interfaces
     {
         Task<ApiResponse<List<ProductoDto>>> GetAll();
         Task<ApiResponse<ProductoDto>> GetById(int id);
-        Task<ApiResponse<Producto>> Create(ProductoDto productoDto);
+        Task<ApiResponse<ProductoDto>> Create(ProductoDto productoDto);
         Task<ApiResponse<ProductoDto>> Update(int id, ProductoDto productoDto);
         Task<ApiResponse<ProductoDto>> Delete(int id);
     }

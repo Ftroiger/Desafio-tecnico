@@ -9,6 +9,11 @@ namespace Desafio_tecnico.Data
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.UseSqlite("Data Source=productos.db");
+        }
+
         public DbSet<Producto> Productos { get; set; }
     }
 

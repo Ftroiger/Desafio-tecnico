@@ -13,14 +13,12 @@ namespace Desafio_tecnico.Services
         private readonly IProductoRepository _productoRepository;
         private readonly IMapper _mapper;
 
-        // Genero constructor para inyectar dependencias
         public ProductoService(IProductoRepository productoRepository, IMapper mapper)
         {
             _productoRepository = productoRepository;
             _mapper = mapper;
         }
 
-        // Obtengo listado de productos
         public async Task<ApiResponse<List<ProductoDto>>> GetAll()
         {
             var response = new ApiResponse<List<ProductoDto>>();
@@ -36,7 +34,10 @@ namespace Desafio_tecnico.Services
                 {
                     response.data = _mapper.Map<List<ProductoDto>>(productos);
                 }
-                response.SetError("No se encontraron productos", HttpStatusCode.NotFound);
+                else
+                {
+                    response.SetError("No se encontraron productos", HttpStatusCode.NotFound);
+                }      
 
             } catch (Exception e)
             {
@@ -46,7 +47,6 @@ namespace Desafio_tecnico.Services
             return response;
         }
 
-        // Obtengo producto por id
         public async Task<ApiResponse<ProductoDto>> GetById(int id)
         {
             var response = new ApiResponse<ProductoDto>();
@@ -58,7 +58,11 @@ namespace Desafio_tecnico.Services
                 {
                     response.data = _mapper.Map<ProductoDto>(producto);
                 }
+                else
+                {
                     response.SetError("Producto no encontrado", HttpStatusCode.NotFound);
+                }
+                    
             } catch (Exception e)
             {
                 response.SetError(e.Message, HttpStatusCode.InternalServerError);
@@ -66,7 +70,6 @@ namespace Desafio_tecnico.Services
             return response;
         }
 
-        // Inserto un nuevo producto
         public async Task<ApiResponse<ProductoDto>> Create(ProductoDto productoDto)
         {
             var response = new ApiResponse<ProductoDto>();
@@ -79,8 +82,11 @@ namespace Desafio_tecnico.Services
                     await _productoRepository.Create(producto);
                     response.data = productoDto;
                 }
-
-                 response.SetError("Error al insertar producto", HttpStatusCode.BadRequest);
+                else
+                {
+                    response.SetError("Error al insertar producto", HttpStatusCode.BadRequest);
+                }
+                
                 
             } catch (Exception e)
             {
@@ -94,8 +100,8 @@ namespace Desafio_tecnico.Services
             if (
                 productoDto.name == null ||
                 productoDto.description == null ||
-                productoDto.price < 0 ||
-                productoDto.quantity < 0
+                productoDto.price <= 0 ||
+                productoDto.quantity <= 0
                 )
             {
                 return false;
@@ -103,28 +109,29 @@ namespace Desafio_tecnico.Services
             return true;
         }
 
-        // Elimino un producto
-        public async Task<ApiResponse<ProductoDto>> Delete(int id)
+        public async Task<ApiResponse<string>> Delete(int id)
         {
-            var response = new ApiResponse<ProductoDto>();
+            var response = new ApiResponse<string>();
             try
             {
                 var producto = await _productoRepository.GetById(id);
 
-                if (producto != null)
+                if (producto == null)
                 {
-                    await _productoRepository.Delete(id);
-                    response.data = _mapper.Map<ProductoDto>(producto);
+                    response.SetError("Producto no encontrado", HttpStatusCode.NotFound);
+                    return response;
                 }
-                response.SetError("Producto no encontrado", HttpStatusCode.NotFound);
+                await _productoRepository.Delete(id);
+                response.data = "Producto eliminado exitosamente";
+
             } catch (Exception e)
             {
                 response.SetError(e.Message, HttpStatusCode.InternalServerError);
             }
             return response;
         }
-        
-        // Actualizo un producto existente
+
+
         public async Task<ApiResponse<ProductoDto>> Update(int id, ProductoDto productoDto)
         {
             var response = new ApiResponse<ProductoDto>();
